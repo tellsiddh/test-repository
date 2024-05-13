@@ -1,0 +1,80 @@
+name: Release on PR Merge
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+
+jobs:
+  create_release:
+
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Zip the repository
+        run: |
+          echo pwd
+          cd folder1/
+          # Check if zip command is available
+          if ! command -v zip &> /dev/null
+          then
+              echo "zip command could not be found. Please install zip package."
+              exit 1
+          fi
+
+          # Loop through all directories in the current folder
+          for dir in */
+          do
+              # Remove trailing slash from directory name for the zip file name
+              base=$(basename "$dir")
+              
+              # Check if the directory is the special case "data"
+              if [ "$base" == "data" ]; then
+                  version_file="${dir}sqs/version.py"
+              else
+                  version_file="${dir}version.py"
+              fi
+
+              # Check if version.py exists in the directory
+              if [ -f "$version_file" ]; then
+                  # Attempt to extract the version number
+                  version=$(grep '__version__' "$version_file" | cut -d"'" -f2)
+                  if [ ! -z "$version" ]; then
+                      echo "Version found in $version_file: $version"
+                      zip_name="${base}-${version}.zip"
+                  else
+                      echo "No version found in $version_file. Using default name."
+                      zip_name="${base}.zip"
+                  fi
+              else
+                  echo "No version file found in $dir. Using default name."
+                  zip_name="${base}.zip"
+              fi
+
+              # Zip the directory
+              zip -r "$zip_name" "$dir"
+          done
+
+          echo "All directories have been zipped successfully."
+
+      - name: Install GitHub CLI
+        run: |
+          sudo apt update
+          sudo apt install -y gh
+
+      # Configure GitHub CLI
+      - name: GitHub CLI configuration
+        run: echo "GH_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_ENV
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+
+      - name: Create Release and Upload PDFs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG_NAME="release-$(date +'%Y%m%d%H%M%S')"
+          gh release create "$TAG_NAME" *.zip --title "Release $TAG_NAME" --notes "Automated release of the repository"
