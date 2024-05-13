@@ -42,7 +42,8 @@ jobs:
               # Check if version.py exists in the directory
               if [ -f "$version_file" ]; then
                   # Attempt to extract the version number
-                  version=$(grep '__version__' "$version_file" | cut -d"'" -f2)
+                  # The following grep command captures the version number directly by using a regex pattern
+                  version=$(grep -oP "__version__ = \"\K[^\"]+" "$version_file")
                   if [ ! -z "$version" ]; then
                       echo "Version found in $version_file: $version"
                       zip_name="${base}-${version}.zip"
@@ -58,6 +59,7 @@ jobs:
               # Zip the directory
               zip -r "$zip_name" "$dir"
           done
+
           ls
           echo "All directories have been zipped successfully."
 
