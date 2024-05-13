@@ -58,7 +58,7 @@ jobs:
               # Zip the directory
               zip -r "$zip_name" "$dir"
           done
-
+          ls
           echo "All directories have been zipped successfully."
 
       - name: Install GitHub CLI
