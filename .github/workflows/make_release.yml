@@ -18,7 +18,7 @@ jobs:
       - name: Zip the repository
         run: |
           echo pwd
-          cd containers/lambda/
+          cd folder1
           # Check if zip command is available
           if ! command -v zip &> /dev/null
           then
@@ -79,4 +79,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG_NAME="r$(echo "${{ github.event.number }}")"
-          gh release create "$TAG_NAME" containers/lambda/*.zip --title "$TAG_NAME" --notes "Automated release of the repository"
+          gh release create "$TAG_NAME" folder1/*.zip --title "$TAG_NAME" --notes "Automated release of the repository"
