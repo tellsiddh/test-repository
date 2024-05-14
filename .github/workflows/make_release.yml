@@ -78,5 +78,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG_NAME="release-$(date +'%Y%m%d%H%M%S')"
-          gh release create "$TAG_NAME" folder1/*.zip --title "$TAG_NAME" --notes "Automated release of the repository"
+          TAG_NAME="release-PR-${{ github.event.pull_request.number }}"
+          gh release create "$TAG_NAME" containers/lambda/*.zip --title "$TAG_NAME" --notes "Automated release of the repository"
