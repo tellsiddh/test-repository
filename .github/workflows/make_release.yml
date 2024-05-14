@@ -15,19 +15,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Get PR details
-        id: pr_details
-        run: |
-          PR_NUMBER=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
-          PR_NAME=$(curl -sSL -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-                    -H "Accept: application/vnd.github.v3+json" \
-                    https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER | jq -r .title)
-          PR_DESCRIPTION=$(curl -sSL -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-                           -H "Accept: application/vnd.github.v3+json" \
-                           https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER | jq -r .body)
-          echo "::set-output name=pr_name::$PR_NAME"
-          echo "::set-output name=pr_description::$PR_DESCRIPTION"
-
       - name: Zip the repository
         run: |
           echo pwd
@@ -92,4 +79,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG_NAME="r${{ github.event.number }}"
-          gh release create "$TAG_NAME" folder1/*.zip --title "$TAG_NAME" --notes "PR Name: $PR_NAME\n\nPR Description: $PR_DESCRIPTION"
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          PR_DESCRIPTION="${{ github.event.pull_request.body }}"
+          RELEASE_NOTES="Title: $PR_TITLE\n\nDescription:\n$PR_DESCRIPTION"
+          gh release create "$TAG_NAME" folder1/*.zip --title "$TAG_NAME" --notes "$RELEASE_NOTES"
