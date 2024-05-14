@@ -78,5 +78,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG_NAME="r$(echo "${{ github.event.number }}")"
+          TAG_NAME="r${{ github.event.number }}"
           gh release create "$TAG_NAME" folder1/*.zip --title "$TAG_NAME" --notes "Automated release of the repository"
