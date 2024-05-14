@@ -80,6 +80,6 @@ jobs:
         run: |
           TAG_NAME="r${{ github.event.number }}"
           PR_TITLE="${{ github.event.pull_request.title }}"
-          PR_DESCRIPTION="""${{ github.event.pull_request.body }}"""
+          PR_DESCRIPTION="${{ github.event.pull_request.body }}"
           RELEASE_NOTES="Title: $PR_TITLE\n\nDescription:\n$PR_DESCRIPTION"
           gh release create "$TAG_NAME" folder1/*.zip --title "$TAG_NAME" --notes "$RELEASE_NOTES"
